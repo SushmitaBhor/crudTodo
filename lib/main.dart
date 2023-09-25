@@ -61,12 +61,33 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  Future<void> _createItem(Map<String,dynamic> newItem)async{
-    await _shoppingBox.add(newItem);
-  }
+
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _quantityController = TextEditingController();
 
+  List<Map<String, dynamic>> _items=[];
+
+  final _shoppingBox = Hive.box('shopping_box');
+
+  void _refreshItem(){
+    final data = _shoppingBox.keys.map((key){
+      final item = _shoppingBox.get(key);
+      return {"key":key,"name":item['name'],"quantity":item['quantity']};
+    }).toList();
+
+    setState(() {
+      _items = data.reversed.toList();
+      print("item count is ${_items.length}");
+
+    });
+
+  }
+
+  Future<void> _createItem(Map<String,dynamic> newItem)async{
+    await _shoppingBox.add(newItem);
+    _refreshItem();
+    print("amount data is ${_shoppingBox.length}");
+  }
   void _showForm(BuildContext ctx, int? itemKey) async {
     showModalBottomSheet(context: ctx,elevation: 5,isScrollControlled: true,builder: (_)=>Container(padding: EdgeInsets.only(bottom: MediaQuery.of(ctx).viewInsets.bottom,top: 15,left: 15,right: 15),
     child: Column(
